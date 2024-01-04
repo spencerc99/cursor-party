@@ -2,6 +2,7 @@ import * as React from "react";
 import { render } from "react-dom";
 import PresenceProvider from "./presence/presence-context";
 import Cursors from "./presence/Cursors";
+import randomcolor from "randomcolor";
 
 declare const PARTYKIT_HOST: string;
 
@@ -9,14 +10,32 @@ const pageId = window?.location.href
   ? btoa(window.location.href.split(/[?#]/)[0])
   : "default";
 
+function useStickyState<T = any>(
+  key: string,
+  defaultValue: T
+): [T, (value: T) => void] {
+  const [value, setValue] = React.useState(() => {
+    const stickyValue = window.localStorage.getItem(key);
+    return stickyValue !== null ? JSON.parse(stickyValue) : defaultValue;
+  });
+  React.useEffect(() => {
+    console.log("setting!");
+    window.localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+  return [value, setValue];
+}
+
 function App() {
+  const [color, setColor] = useStickyState("color", randomcolor());
+  console.log(color);
+
   return (
     <PresenceProvider
       host={PARTYKIT_HOST}
       room={pageId}
       presence={{
         name: "Anonymous User",
-        color: "#0000f0",
+        color,
       }}
     >
       <Cursors />

@@ -54,11 +54,11 @@ export default function Cursor(props: {
       }}
     >
       {cursor.pointer === "mouse" ? (
-        <MousePointer fill={props.fill} />
+        <MousePointer fill={user?.presence.color || props.fill} />
       ) : (
-        <TouchPointer fill={props.fill} />
+        <TouchPointer fill={user?.presence.color || props.fill} />
       )}
-      {cursor.message === null && cursor.country !== null && (
+      {/* {cursor.message === null && cursor.country !== null && (
         <div
           style={{
             position: "absolute",
@@ -71,7 +71,7 @@ export default function Cursor(props: {
         >
           {flag}
         </div>
-      )}
+      )} */}
       {cursor.message !== null && (
         <div
           style={{
@@ -84,7 +84,7 @@ export default function Cursor(props: {
             padding: "4px 9px 4px 9px",
             borderRadius: "16px 16px 16px 16px",
             whiteSpace: "nowrap",
-            backgroundColor: "rgba(52,199,89,1)", // or props.fill,
+            backgroundColor: "rgba(52,199,89,1)", // or user?.presence.color || props.fill,
             top: "17px",
             left: "22px",
           }}
