@@ -19,7 +19,6 @@ function useStickyState<T = any>(
     return stickyValue !== null ? JSON.parse(stickyValue) : defaultValue;
   });
   React.useEffect(() => {
-    console.log("setting!");
     window.localStorage.setItem(key, JSON.stringify(value));
   }, [key, value]);
   return [value, setValue];
@@ -27,7 +26,6 @@ function useStickyState<T = any>(
 
 function App() {
   const [color, setColor] = useStickyState("color", randomcolor());
-  console.log(color);
 
   return (
     <PresenceProvider
