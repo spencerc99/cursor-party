@@ -145,8 +145,15 @@ export default function PresenceProvider(props: {
     pendingUpdate,
     clearPendingUpdate,
     synced,
+    updatePresence,
     setSynced,
   } = usePresence();
+
+  useEffect(() => {
+    if (props.presence.color) {
+      updatePresence({ color: props.presence.color });
+    }
+  }, [props.presence.color]);
 
   const updateUsers = (message: PartyMessage) => {
     if (message.type !== "changes") return;

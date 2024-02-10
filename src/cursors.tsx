@@ -27,6 +27,9 @@ function useStickyState<T = any>(
 function App() {
   const [color, setColor] = useStickyState("color", randomcolor());
 
+  // @ts-ignore
+  window.setCursorColor = setColor;
+
   return (
     <PresenceProvider
       host={PARTYKIT_HOST}
