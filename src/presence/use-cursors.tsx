@@ -19,6 +19,21 @@ export const usePresenceWithCursors = create<PresenceWithCursorsStore>(() => ({
   within: "window",
 }));
 
+function extractUrlFromCursorStyle(cursorStyle: string) {
+  // Regular expression to match the URL inside url(...)
+  const urlPattern = /url\(["']?(.*?)["']?\)/;
+
+  // Test the cursorStyle against the regular expression
+  const match = cursorStyle.match(urlPattern);
+
+  // If a match is found, return the URL; otherwise, return null
+  if (match) {
+    return match[1];
+  } else {
+    return null;
+  }
+}
+
 /*
 We can track and display cursors relative to one of three reference frames:
 
@@ -73,16 +88,28 @@ export default function useCursorTracking(
   const [documentCursor, setDocumentCursor] = useState<Cursor | null>(null);
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
+      let pointer = "mouse";
+      const element = document.elementFromPoint(e.clientX, e.clientY);
+
+      if (element) {
+        // Get the computed style of the element
+        const style = window.getComputedStyle(element);
+        const maybeCustomCursor = extractUrlFromCursorStyle(style.cursor);
+
+        if (maybeCustomCursor) {
+          pointer = maybeCustomCursor;
+        }
+      }
       setWindowCursor({
         x: e.clientX,
         y: e.clientY,
-        pointer: "mouse",
+        pointer,
       });
       if (within === "document") {
         setDocumentCursor({
           x: e.pageX,
           y: e.pageY,
-          pointer: "mouse",
+          pointer,
         });
       }
     };

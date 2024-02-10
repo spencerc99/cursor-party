@@ -4,7 +4,7 @@ import z from "zod";
 export type Cursor = {
   x: number;
   y: number;
-  pointer: "mouse" | "touch";
+  pointer: "mouse" | "touch" | string;
 };
 
 // user-modifiable fields
@@ -51,7 +51,7 @@ export type ClientMessage = {
 export const cursorSchema = z.object({
   x: z.number(),
   y: z.number(),
-  pointer: z.union([z.literal("mouse"), z.literal("touch")]),
+  pointer: z.union([z.literal("mouse"), z.literal("touch"), z.string()]),
 });
 
 export const presenceSchema = z.object({
