@@ -24,11 +24,22 @@ function useStickyState<T = any>(
   return [value, setValue];
 }
 
+interface Cursors {
+  color: string;
+  setColor: (color: string) => void;
+}
+
 function App() {
   const [color, setColor] = useStickyState("color", randomcolor());
 
-  // @ts-ignore
-  window.setCursorColor = setColor;
+  React.useEffect(() => {
+    // @ts-ignore
+    window.cursors = {
+      color,
+      // TODO: add validation?
+      setColor,
+    } as Cursors;
+  }, [color, setColor]);
 
   return (
     <PresenceProvider
