@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { useState, useEffect } from "react";
 import type { Cursor, User } from "./presence-schema";
 import { usePresence } from "./presence-context";
+import { getStartingCustomCursorStyle } from "../cursors";
 
 export type PresenceWithCursorsStore = {
   myId: string | null;
@@ -21,17 +22,31 @@ export const usePresenceWithCursors = create<PresenceWithCursorsStore>(() => ({
 
 function extractUrlFromCursorStyle(cursorStyle: string) {
   // Regular expression to match the URL inside url(...)
-  const urlPattern = /url\(["']?(.*?)["']?\)/;
+  // const urlPattern = /url\(["']?(.*?)["']?\)/;
+  // // Test the cursorStyle against the regular expression
+  // const match = cursorStyle.match(urlPattern);
 
-  // Test the cursorStyle against the regular expression
-  const match = cursorStyle.match(urlPattern);
-
-  // If a match is found, return the URL; otherwise, return null
-  if (match) {
-    return match[1];
-  } else {
-    return null;
+  // // If a match is found, return the URL; otherwise, return null
+  // if (match) {
+  //   return match[1];
+  // } else {
+  //   return null;
+  // }
+  if (!cursorStyle.startsWith('url("')) {
+    return;
   }
+  cursorStyle = cursorStyle.slice(5);
+
+  if (!cursorStyle.endsWith('"), auto') || cursorStyle.endsWith('")')) {
+    return;
+  }
+  if (cursorStyle.endsWith('"), auto')) {
+    cursorStyle = cursorStyle.slice(0, cursorStyle.length - 8);
+  } else {
+    cursorStyle = cursorStyle.slice(0, cursorStyle.length - 2);
+  }
+
+  return cursorStyle;
 }
 
 /*
@@ -97,7 +112,11 @@ export default function useCursorTracking(
         const maybeCustomCursor = extractUrlFromCursorStyle(style.cursor);
 
         if (maybeCustomCursor) {
-          pointer = maybeCustomCursor;
+          if (maybeCustomCursor.startsWith(getStartingCustomCursorStyle())) {
+            // dont change if it starts with our custom cursor
+          } else {
+            pointer = maybeCustomCursor;
+          }
         }
       }
       setWindowCursor({
