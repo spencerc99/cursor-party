@@ -20,11 +20,6 @@ function useStickyState<T = any>(
   return [value, setValue];
 }
 
-interface Cursors {
-  color: string;
-  setColor: (color: string) => void;
-}
-
 // from: https://github.com/yoksel/url-encoder/blob/master/src/js/script.js
 const symbols = /[\r\n%#()<>?[\\\]^`{|}]/g;
 function encodeSVG(svgData: string) {
@@ -86,23 +81,42 @@ export function getStartingCustomCursorStyle() {
       </g>`);
 }
 
+declare global {
+  interface Window {
+    cursors: {
+      color: string;
+      setColor: (color: string) => void;
+      count: number;
+    };
+    cursorParty: {
+      room?: string;
+      hideCursors?: boolean;
+    };
+  }
+}
+if (!window.cursors) {
+  window.cursors = {
+    color: "",
+    setColor: (color: string) => {},
+    count: 0,
+  };
+}
+if (!window.cursorParty) {
+  window.cursorParty = {};
+}
+
 function App() {
   const [color, setColor] = useStickyState("color", randomcolor());
-  // @ts-ignore
   const room =
     window?.cursorParty?.room ??
     (window?.location.href
       ? btoa(window.location.href.split(/[?#]/)[0])
       : "default");
-  const hideCursors = window?.cursorParty?.hideCursors ?? false;
+  const hideCursors = window?.cursorParty?.hideCursors || false;
   React.useEffect(() => {
     document.documentElement.style.cursor = getCursorStyleForUser(color);
-    // @ts-ignore
-    window.cursors = {
-      color,
-      // TODO: add validation?
-      setColor,
-    } as Cursors;
+    window.cursors.color = color;
+    window.cursors.setColor = setColor;
   }, [color, setColor]);
 
   return (
