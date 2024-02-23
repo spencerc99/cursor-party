@@ -5,12 +5,16 @@ import Chat from "./Chat";
 
 const ENABLE_CHAT = false;
 
-export default function Cursors() {
+export default function Cursors({
+  hideCursors = false,
+}: {
+  hideCursors: boolean;
+}) {
   useCursorTracking("document");
 
   return (
     <>
-      <OtherCursors showChat={ENABLE_CHAT} />
+      {hideCursors ? null : <OtherCursors showChat={ENABLE_CHAT} />}
       {ENABLE_CHAT && <Chat />}
     </>
   );

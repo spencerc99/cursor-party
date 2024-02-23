@@ -128,7 +128,7 @@ function App() {
         color,
       }}
     >
-      {hideCursors ? null : <Cursors />}
+      <Cursors hideCursors />
     </PresenceProvider>
   );
 }
