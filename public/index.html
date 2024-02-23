@@ -45,7 +45,9 @@
             try {
               websites = JSON.parse(window.__WEBSITES__);
 
-              document.write(`<p>The following websites are in the allowlist:</p>`);
+              document.write(
+                `<p>The following websites are in the allowlist:</p>`
+              );
               document.write(`<ul>`);
               websites.forEach((website) => {
                 document.write(`<li><code>${website}</code></li>`);
@@ -89,12 +91,13 @@
         />
         <p>
           To configure or customize your Cursor Party,
-          <a href="https://github.com/partykit/cursor-party"
-            >read the docs</a
-          >.
+          <a href="https://github.com/partykit/cursor-party">read the docs</a>.
         </p>
       </section>
     </main>
+    <script>
+      window.cursorParty = { room: "hello" };
+    </script>
     <script src="/cursors.js"></script>
   </body>
 </html>

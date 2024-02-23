@@ -6,10 +6,6 @@ import randomcolor from "randomcolor";
 
 declare const PARTYKIT_HOST: string;
 
-const pageId = window?.location.href
-  ? btoa(window.location.href.split(/[?#]/)[0])
-  : "default";
-
 function useStickyState<T = any>(
   key: string,
   defaultValue: T
@@ -92,6 +88,12 @@ export function getStartingCustomCursorStyle() {
 
 function App() {
   const [color, setColor] = useStickyState("color", randomcolor());
+  // @ts-ignore
+  const room =
+    window?.cursorParty?.room ??
+    (window?.location.href
+      ? btoa(window.location.href.split(/[?#]/)[0])
+      : "default");
 
   React.useEffect(() => {
     document.documentElement.style.cursor = getCursorStyleForUser(color);
@@ -106,7 +108,7 @@ function App() {
   return (
     <PresenceProvider
       host={PARTYKIT_HOST}
-      room={pageId}
+      room={room}
       presence={{
         name: "Anonymous User",
         color,
