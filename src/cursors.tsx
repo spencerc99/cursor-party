@@ -94,7 +94,7 @@ function App() {
     (window?.location.href
       ? btoa(window.location.href.split(/[?#]/)[0])
       : "default");
-
+  const hideCursors = window?.cursorParty?.hideCursors ?? false;
   React.useEffect(() => {
     document.documentElement.style.cursor = getCursorStyleForUser(color);
     // @ts-ignore
@@ -114,7 +114,7 @@ function App() {
         color,
       }}
     >
-      <Cursors />
+      {hideCursors ? null : <Cursors />}
     </PresenceProvider>
   );
 }

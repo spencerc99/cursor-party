@@ -147,6 +147,7 @@ export default function PresenceProvider(props: {
     synced,
     updatePresence,
     setSynced,
+    otherUsers,
   } = usePresence();
 
   useEffect(() => {
@@ -154,6 +155,11 @@ export default function PresenceProvider(props: {
       updatePresence({ color: props.presence.color });
     }
   }, [props.presence.color]);
+
+  useEffect(() => {
+    // @ts-ignore
+    window.cursors.count = otherUsers.size + 1;
+  }, [otherUsers.size]);
 
   const updateUsers = (message: PartyMessage) => {
     if (message.type !== "changes") return;
