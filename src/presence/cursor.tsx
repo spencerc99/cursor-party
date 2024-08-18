@@ -68,7 +68,7 @@ export default function Cursor(props: {
     }
   }, [cursor.pointer, user?.presence.color, props.fill]);
   const truncatedName =
-    cursor.name?.length > MaxNameLength
+    (cursor.name?.length || 0) > MaxNameLength
       ? cursor.name?.slice(0, MaxNameLength) + "..."
       : cursor.name;
 
@@ -81,7 +81,7 @@ export default function Cursor(props: {
       }}
     >
       {renderedCursor}
-      {cursor.message === null && cursor.name !== null && (
+      {Boolean(cursor.name) && (
         <div
           style={{
             position: "absolute",

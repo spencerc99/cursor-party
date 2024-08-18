@@ -123,13 +123,17 @@ function App() {
     window.cursors.color = color;
     window.cursors.setColor = setColor;
   }, [color, setColor]);
+  React.useEffect(() => {
+    window.cursors.name = name;
+    window.cursors.setName = setName;
+  }, [name, setName]);
 
   return (
     <PresenceProvider
       host={PARTYKIT_HOST}
       room={room}
       presence={{
-        name: name,
+        name,
         color,
       }}
     >
