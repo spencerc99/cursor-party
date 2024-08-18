@@ -55,7 +55,7 @@ export const cursorSchema = z.object({
 });
 
 export const presenceSchema = z.object({
-  name: z.string().optional(),
+  name: z.string().optional().nullable(),
   color: z.string(),
   cursor: cursorSchema.optional().nullable(),
   message: z.string().optional().nullable(),

@@ -9,6 +9,24 @@ import { usePresenceWithCursors } from "./use-cursors";
 
 const MaxNameLength = 16;
 
+function opacifyColorFromFill(fill: string, opacity: number) {
+  if (fill.startsWith("#")) {
+    const hex = fill.replace("#", "");
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  } else if (fill.startsWith("rgba")) {
+    return fill.replace(/\d?\.?\d*\s*\)/, `${opacity})`);
+  } else if (fill.startsWith("rgb")) {
+    return fill.replace("rgb", "rgba").replace(")", `, ${opacity})`);
+  } else if (fill.startsWith("hsla")) {
+    return fill.replace(/\d?\.?\d*\s*\)/, `${opacity})`);
+  } else if (fill.startsWith("hsl")) {
+    return fill.replace("hsl", "hsla").replace(")", `, ${opacity})`);
+  }
+}
+
 export default function Cursor(props: {
   userId: string;
   fill: string;
@@ -67,11 +85,22 @@ export default function Cursor(props: {
         );
     }
   }, [cursor.pointer, user?.presence.color, props.fill]);
-  const truncatedName =
-    (cursor.name?.length || 0) > MaxNameLength
-      ? cursor.name?.slice(0, MaxNameLength) + "..."
-      : cursor.name;
+  const truncatedName = React.useMemo(
+    () =>
+      (cursor.name?.length || 0) > MaxNameLength
+        ? cursor.name?.slice(0, MaxNameLength) + "..."
+        : cursor.name,
+    [cursor.name]
+  );
 
+  const borderColor = React.useMemo(
+    () => opacifyColorFromFill(user?.presence.color || props.fill, 0.6),
+    [user?.presence.color, props.fill]
+  );
+  const boxShadowColor = React.useMemo(
+    () => opacifyColorFromFill(user?.presence.color || props.fill, 0.3),
+    [user?.presence.color, props.fill]
+  );
   return (
     <div
       style={{
@@ -89,10 +118,12 @@ export default function Cursor(props: {
             padding: "4px",
             fontSize: "16px",
             background: user.presence.color,
-            borderRadius: "12px",
+            borderRadius: "14px",
             top: "14px",
             left: "18px",
             opacity: 0.9,
+            border: `1px solid ${borderColor}`,
+            boxShadow: `1px 1px 4px 2px ${boxShadowColor}`,
           }}
         >
           {truncatedName}
