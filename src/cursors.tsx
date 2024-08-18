@@ -86,6 +86,8 @@ declare global {
     cursors: {
       color: string;
       setColor: (color: string) => void;
+      name: string;
+      setName: (name: string) => void;
       count: number;
     };
     cursorParty: {
@@ -99,6 +101,8 @@ if (!window.cursors) {
     color: "",
     setColor: (color: string) => {},
     count: 0,
+    name: "",
+    setName: (name: string) => {},
   };
 }
 if (!window.cursorParty) {
@@ -107,6 +111,7 @@ if (!window.cursorParty) {
 
 function App() {
   const [color, setColor] = useStickyState("color", randomcolor());
+  const [name, setName] = useStickyState("username", "");
   const room =
     window?.cursorParty?.room ??
     (window?.location.href
@@ -124,7 +129,7 @@ function App() {
       host={PARTYKIT_HOST}
       room={room}
       presence={{
-        name: "Anonymous User",
+        name: name,
         color,
       }}
     >

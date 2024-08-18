@@ -7,6 +7,8 @@ import { usePresenceWithCursors } from "./use-cursors";
 // The pointer SVG is from https://github.com/daviddarnes/mac-cursors
 // The license is the Apple User Agreement
 
+const MaxNameLength = 16;
+
 export default function Cursor(props: {
   userId: string;
   fill: string;
@@ -17,16 +19,20 @@ export default function Cursor(props: {
   );
   if (!user?.presence?.cursor) return;
 
-  const cursor = {
-    x: user.presence.cursor.x,
-    y: user.presence.cursor.y,
-    pointer: user.presence.cursor.pointer,
-    country: user.metadata.country,
-    message: user.presence.message ?? null,
-  };
+  const cursor = React.useMemo(
+    () => ({
+      x: user.presence!.cursor!.x,
+      y: user.presence!.cursor!.y,
+      pointer: user.presence!.cursor!.pointer,
+      country: user.metadata.country,
+      message: user.presence.message ?? null,
+      name: user.presence.name ?? null,
+    }),
+    [user]
+  );
 
   const offset = 10;
-  const flag = cursor.country ? `${countryCodeEmoji(cursor.country)} ` : "";
+  // const flag = cursor.country ? `${countryCodeEmoji(cursor.country)} ` : "";
 
   // Optional: show ghosted cursors unless the user is chatting
   const styles = {
@@ -44,7 +50,8 @@ export default function Cursor(props: {
   //     zIndex: 1000,
   //   };
 
-  const renderCursor = () => {
+  const renderedCursor = React.useMemo(() => {
+    console.log("rendering cursor", cursor.pointer);
     const { pointer } = cursor;
     switch (pointer) {
       case "mouse":
@@ -59,7 +66,11 @@ export default function Cursor(props: {
           />
         );
     }
-  };
+  }, [cursor.pointer, user?.presence.color, props.fill]);
+  const truncatedName =
+    cursor.name?.length > MaxNameLength
+      ? cursor.name?.slice(0, MaxNameLength) + "..."
+      : cursor.name;
 
   return (
     <div
@@ -69,21 +80,24 @@ export default function Cursor(props: {
         ...styles,
       }}
     >
-      {renderCursor()}
-      {/* {cursor.message === null && cursor.country !== null && (
+      {renderedCursor}
+      {cursor.message === null && cursor.name !== null && (
         <div
           style={{
             position: "absolute",
             whiteSpace: "nowrap",
             padding: "4px",
-            fontSize: "24px",
-            top: "10px",
-            left: "16px",
+            fontSize: "16px",
+            background: user.presence.color,
+            borderRadius: "12px",
+            top: "14px",
+            left: "18px",
+            opacity: 0.9,
           }}
         >
-          {flag}
+          {truncatedName}
         </div>
-      )} */}
+      )}
       {cursor.message !== null && (
         <div
           style={{
