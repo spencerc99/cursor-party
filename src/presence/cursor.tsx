@@ -117,7 +117,7 @@ export default function Cursor(props: {
             whiteSpace: "nowrap",
             padding: "4px",
             fontSize: "16px",
-            background: user.presence.color,
+            background: user?.presence.color || props.fill,
             borderRadius: "14px",
             top: "14px",
             left: "18px",

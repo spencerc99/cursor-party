@@ -9,8 +9,8 @@ export type Cursor = {
 
 // user-modifiable fields
 export type Presence = {
-  name?: string;
-  color: string;
+  name?: string | null;
+  color?: string | null;
   cursor?: Cursor | null;
   message?: string | null;
   spotlightColor?: string;
@@ -56,7 +56,7 @@ export const cursorSchema = z.object({
 
 export const presenceSchema = z.object({
   name: z.string().optional().nullable(),
-  color: z.string(),
+  color: z.string().optional().nullable(),
   cursor: cursorSchema.optional().nullable(),
   message: z.string().optional().nullable(),
   spotlightColor: z.string().optional(),
