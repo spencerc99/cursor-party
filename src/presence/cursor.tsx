@@ -7,7 +7,69 @@ import { usePresenceWithCursors } from "./use-cursors";
 // The pointer SVG is from https://github.com/daviddarnes/mac-cursors
 // The license is the Apple User Agreement
 
-const MaxNameLength = 16;
+const MaxNameLength = 10;
+
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  h /= 360;
+  s /= 100;
+  l /= 100;
+
+  let r: number, g: number, b: number;
+
+  if (s === 0) {
+    r = g = b = l; // achromatic
+  } else {
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    };
+
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function getLuminance(color: string): number {
+  let r: number, g: number, b: number;
+
+  if (color.startsWith("#")) {
+    const hex = color.replace("#", "");
+    r = parseInt(hex.substring(0, 2), 16);
+    g = parseInt(hex.substring(2, 4), 16);
+    b = parseInt(hex.substring(4, 6), 16);
+  } else if (color.startsWith("rgb")) {
+    const matches = color.match(/\d+/g);
+    if (!matches || matches.length < 3) return 0;
+    [r, g, b] = matches.map(Number);
+  } else if (color.startsWith("hsl")) {
+    const matches = color.match(/\d+(\.\d+)?/g);
+    if (!matches || matches.length < 3) return 0;
+    const [h, s, l] = matches.map(Number);
+    [r, g, b] = hslToRgb(h, s, l);
+  } else {
+    return 0;
+  }
+
+  // Convert RGB to relative luminance using the formula from WCAG 2.0
+  const [rs, gs, bs] = [r / 255, g / 255, b / 255].map((val) =>
+    val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4)
+  );
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function getContrastColor(backgroundColor: string): string {
+  const luminance = getLuminance(backgroundColor);
+  return luminance > 0.5 ? "#000000" : "#ffffff";
+}
 
 function opacifyColorFromFill(fill: string, opacity: number) {
   if (fill.startsWith("#")) {
@@ -69,7 +131,6 @@ export default function Cursor(props: {
   //   };
 
   const renderedCursor = React.useMemo(() => {
-    console.log("rendering cursor", cursor.pointer);
     const { pointer } = cursor;
     switch (pointer) {
       case "mouse":
@@ -88,7 +149,7 @@ export default function Cursor(props: {
   const truncatedName = React.useMemo(
     () =>
       (cursor.name?.length || 0) > MaxNameLength
-        ? cursor.name?.slice(0, MaxNameLength) + "..."
+        ? cursor.name?.slice(0, MaxNameLength) + ".."
         : cursor.name,
     [cursor.name]
   );
@@ -115,15 +176,16 @@ export default function Cursor(props: {
           style={{
             position: "absolute",
             whiteSpace: "nowrap",
-            padding: "4px",
-            fontSize: "16px",
+            padding: "4px 6px",
+            fontSize: "12px",
             background: user?.presence.color || props.fill,
             borderRadius: "14px",
             top: "14px",
             left: "18px",
-            opacity: 0.9,
+            opacity: 0.75,
             border: `1px solid ${borderColor}`,
             boxShadow: `1px 1px 4px 2px ${boxShadowColor}`,
+            color: getContrastColor(user?.presence.color || props.fill),
           }}
         >
           {truncatedName}
