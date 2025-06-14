@@ -157,8 +157,10 @@ export default function PresenceProvider(props: {
   }, [props.presence.color]);
 
   useEffect(() => {
-    // @ts-ignore
-    window.cursors.count = otherUsers.size + 1;
+    console.log("otherUsers.size", otherUsers.size, window.cursors);
+    if (window.cursors) {
+      window.cursors.count = otherUsers.size + 1;
+    }
   }, [otherUsers.size]);
 
   const updateUsers = (message: PartyMessage) => {

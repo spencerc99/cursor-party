@@ -81,14 +81,35 @@ export function getStartingCustomCursorStyle() {
       </g>`);
 }
 
+interface CursorEvents {
+  count: number;
+  color: string;
+  name: string;
+}
+
+interface CursorEventEmitter {
+  on<K extends keyof CursorEvents>(
+    event: K,
+    callback: (value: CursorEvents[K]) => void
+  ): void;
+  off<K extends keyof CursorEvents>(
+    event: K,
+    callback: (value: CursorEvents[K]) => void
+  ): void;
+}
+
 declare global {
   interface Window {
     cursors: {
       color: string;
-      setColor: (color: string) => void;
       name: string;
-      setName: (name: string) => void;
       count: number;
+      /** @deprecated Use window.cursors.color = value instead */
+      setColor: (color: string) => void;
+      /** @deprecated Use window.cursors.name = value instead */
+      setName: (name: string) => void;
+      on: CursorEventEmitter["on"];
+      off: CursorEventEmitter["off"];
     };
     cursorParty: {
       room?: string;
@@ -96,13 +117,79 @@ declare global {
     };
   }
 }
+
 if (!window.cursors) {
+  const listeners = new Map<keyof CursorEvents, Set<Function>>();
+  let _count = 0;
+  let _color = "";
+  let _name = "";
+
   window.cursors = {
-    color: "",
-    setColor: (color: string) => {},
-    count: 0,
-    name: "",
-    setName: (name: string) => {},
+    get color() {
+      return _color;
+    },
+    set color(value: string) {
+      const oldValue = _color;
+      _color = value;
+      if (oldValue !== value) {
+        const callbacks = listeners.get("color");
+        if (callbacks) {
+          callbacks.forEach((callback) => callback(value));
+        }
+      }
+    },
+    // @deprecated Use window.cursors.color = value instead
+    setColor: (color: string) => {
+      console.warn(
+        "window.cursors.setColor() is deprecated. Use window.cursors.color = value instead."
+      );
+      window.cursors.color = color;
+    },
+    get count() {
+      return _count;
+    },
+    set count(value: number) {
+      const oldValue = _count;
+      _count = value;
+      if (oldValue !== value) {
+        console.log("countLISTENER", value);
+        const callbacks = listeners.get("count");
+        if (callbacks) {
+          callbacks.forEach((callback) => callback(value));
+        }
+      }
+    },
+    get name() {
+      return _name;
+    },
+    set name(value: string) {
+      const oldValue = _name;
+      _name = value;
+      if (oldValue !== value) {
+        const callbacks = listeners.get("name");
+        if (callbacks) {
+          callbacks.forEach((callback) => callback(value));
+        }
+      }
+    },
+    // @deprecated Use window.cursors.name = value instead
+    setName: (name: string) => {
+      console.warn(
+        "window.cursors.setName() is deprecated. Use window.cursors.name = value instead."
+      );
+      window.cursors.name = name;
+    },
+    on: (event, callback) => {
+      if (!listeners.has(event)) {
+        listeners.set(event, new Set());
+      }
+      listeners.get(event)?.add(callback);
+      // call it with the current value
+      callback(window.cursors[event]);
+    },
+    off: (event, callback) => {
+      listeners.get(event)?.delete(callback);
+    },
   };
 }
 if (!window.cursorParty) {
@@ -120,12 +207,14 @@ function App() {
   const hideCursors = window?.cursorParty?.hideCursors || false;
   React.useEffect(() => {
     document.documentElement.style.cursor = getCursorStyleForUser(color);
-    window.cursors.color = color;
-    window.cursors.setColor = setColor;
+    if (window.cursors) {
+      window.cursors.color = color;
+    }
   }, [color, setColor]);
   React.useEffect(() => {
-    window.cursors.name = name;
-    window.cursors.setName = setName;
+    if (window.cursors) {
+      window.cursors.name = name;
+    }
   }, [name, setName]);
 
   return (

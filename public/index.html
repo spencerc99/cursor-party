@@ -37,7 +37,7 @@
           >.
         </p>
         <hr />
-        <h2>You’re looking at a custom Cursor Party installation</h2>
+        <h2>You're looking at a custom Cursor Party installation</h2>
 
         <script>
           if (window.__WEBSITES__) {
@@ -93,11 +93,65 @@
           To configure or customize your Cursor Party,
           <a href="https://github.com/partykit/cursor-party">read the docs</a>.
         </p>
+
+        <hr />
+        <h2>Current Users</h2>
+        <div id="current-users">
+          <p>Number of users: <span id="user-count">0</span></p>
+          <div id="user-colors"></div>
+        </div>
       </section>
     </main>
     <script>
       window.cursorParty = { room: "hello" };
     </script>
     <script src="/cursors.js"></script>
+    <script>
+      // Wait for cursors to be initialized
+      window.addEventListener("load", () => {
+        const userCount = document.getElementById("user-count");
+        const userColors = document.getElementById("user-colors");
+        const colors = new Set();
+
+        // Update count display
+        window.cursors.on("count", (count) => {
+          console.log("count", count);
+          userCount.textContent = count;
+        });
+
+        // Update colors display
+        window.cursors.on("color", (color) => {
+          if (!colors.has(color)) {
+            colors.add(color);
+            const colorDiv = document.createElement("div");
+            colorDiv.style.display = "inline-block";
+            colorDiv.style.margin = "4px";
+            colorDiv.style.padding = "8px";
+            colorDiv.style.borderRadius = "4px";
+            colorDiv.style.backgroundColor = color;
+            colorDiv.style.color = getContrastColor(color);
+            colorDiv.textContent = color;
+            userColors.appendChild(colorDiv);
+          }
+        });
+
+        // Helper function to determine text color based on background
+        function getContrastColor(hexcolor) {
+          // Remove the hash if it exists
+          hexcolor = hexcolor.replace("#", "");
+
+          // Convert to RGB
+          const r = parseInt(hexcolor.substr(0, 2), 16);
+          const g = parseInt(hexcolor.substr(2, 2), 16);
+          const b = parseInt(hexcolor.substr(4, 2), 16);
+
+          // Calculate luminance
+          const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+          // Return black or white based on luminance
+          return luminance > 0.5 ? "#000000" : "#ffffff";
+        }
+      });
+    </script>
   </body>
 </html>
