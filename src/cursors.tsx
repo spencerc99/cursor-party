@@ -82,7 +82,7 @@ export function getStartingCustomCursorStyle() {
 }
 
 interface CursorEvents {
-  count: number;
+  allColors: string[];
   color: string;
   name: string;
 }
@@ -103,6 +103,7 @@ declare global {
     cursors: {
       color: string;
       name: string;
+      allColors: string[];
       count: number;
       /** @deprecated Use window.cursors.color = value instead */
       setColor: (color: string) => void;
@@ -120,9 +121,9 @@ declare global {
 
 if (!window.cursors) {
   const listeners = new Map<keyof CursorEvents, Set<Function>>();
-  let _count = 0;
   let _color = "";
   let _name = "";
+  let _allColors: string[] = [];
 
   window.cursors = {
     get color() {
@@ -145,19 +146,6 @@ if (!window.cursors) {
       );
       window.cursors.color = color;
     },
-    get count() {
-      return _count;
-    },
-    set count(value: number) {
-      const oldValue = _count;
-      _count = value;
-      if (oldValue !== value) {
-        const callbacks = listeners.get("count");
-        if (callbacks) {
-          callbacks.forEach((callback) => callback(value));
-        }
-      }
-    },
     get name() {
       return _name;
     },
@@ -177,6 +165,22 @@ if (!window.cursors) {
         "window.cursors.setName() is deprecated. Use window.cursors.name = value instead."
       );
       window.cursors.name = name;
+    },
+    get allColors() {
+      return _allColors;
+    },
+    set allColors(value: string[]) {
+      const oldValue = JSON.stringify(_allColors);
+      _allColors = value;
+      if (oldValue !== JSON.stringify(value)) {
+        const callbacks = listeners.get("allColors");
+        if (callbacks) {
+          callbacks.forEach((callback) => callback(value));
+        }
+      }
+    },
+    get count() {
+      return _allColors.length;
     },
     on: (event, callback) => {
       if (!listeners.has(event)) {

@@ -148,6 +148,8 @@ export default function PresenceProvider(props: {
     updatePresence,
     setSynced,
     otherUsers,
+    myself,
+    myId,
   } = usePresence();
 
   useEffect(() => {
@@ -158,9 +160,21 @@ export default function PresenceProvider(props: {
 
   useEffect(() => {
     if (window.cursors) {
-      window.cursors.count = otherUsers.size + 1;
+      // Update all colors
+      const allColors: string[] = [];
+      // Add current user's color
+      if (myself?.presence?.color) {
+        allColors.push(myself.presence.color);
+      }
+      // Add other users' colors
+      otherUsers.forEach((user) => {
+        if (user.presence?.color) {
+          allColors.push(user.presence.color);
+        }
+      });
+      window.cursors.allColors = allColors;
     }
-  }, [otherUsers.size]);
+  }, [otherUsers.size, otherUsers, myself, myId]);
 
   const updateUsers = (message: PartyMessage) => {
     if (message.type !== "changes") return;

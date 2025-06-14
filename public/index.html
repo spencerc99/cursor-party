@@ -98,7 +98,10 @@
         <h2>Current Users</h2>
         <div id="current-users">
           <p>Number of users: <span id="user-count">0</span></p>
-          <div id="user-colors"></div>
+          <div id="user-colors">
+            <h3>All Cursor Colors</h3>
+            <div id="color-swatches"></div>
+          </div>
         </div>
       </section>
     </main>
@@ -110,19 +113,18 @@
       // Wait for cursors to be initialized
       window.addEventListener("load", () => {
         const userCount = document.getElementById("user-count");
-        const userColors = document.getElementById("user-colors");
-        const colors = new Set();
+        const colorSwatches = document.getElementById("color-swatches");
 
-        // Update count display
-        window.cursors.on("count", (count) => {
-          console.log("count", count);
-          userCount.textContent = count;
-        });
+        // Update colors display and count
+        window.cursors.on("allColors", (colors) => {
+          // Update count using the getter
+          userCount.textContent = window.cursors.count;
 
-        // Update colors display
-        window.cursors.on("color", (color) => {
-          if (!colors.has(color)) {
-            colors.add(color);
+          // Clear existing colors
+          colorSwatches.innerHTML = "";
+
+          // Add each color
+          colors.forEach((color) => {
             const colorDiv = document.createElement("div");
             colorDiv.style.display = "inline-block";
             colorDiv.style.margin = "4px";
@@ -131,8 +133,8 @@
             colorDiv.style.backgroundColor = color;
             colorDiv.style.color = getContrastColor(color);
             colorDiv.textContent = color;
-            userColors.appendChild(colorDiv);
-          }
+            colorSwatches.appendChild(colorDiv);
+          });
         });
 
         // Helper function to determine text color based on background
