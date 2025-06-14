@@ -152,7 +152,6 @@ if (!window.cursors) {
       const oldValue = _count;
       _count = value;
       if (oldValue !== value) {
-        console.log("countLISTENER", value);
         const callbacks = listeners.get("count");
         if (callbacks) {
           callbacks.forEach((callback) => callback(value));

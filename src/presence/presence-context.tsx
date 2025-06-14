@@ -157,7 +157,6 @@ export default function PresenceProvider(props: {
   }, [props.presence.color]);
 
   useEffect(() => {
-    console.log("otherUsers.size", otherUsers.size, window.cursors);
     if (window.cursors) {
       window.cursors.count = otherUsers.size + 1;
     }
