@@ -132,6 +132,7 @@ if (!window.cursors) {
     set color(value: string) {
       const oldValue = _color;
       _color = value;
+      console.log("set color", value, oldValue);
       if (oldValue !== value) {
         const callbacks = listeners.get("color");
         if (callbacks) {
@@ -212,11 +213,17 @@ function App() {
     document.documentElement.style.cursor = getCursorStyleForUser(color);
     if (window.cursors) {
       window.cursors.color = color;
+      window.cursors.on("color", (color) => {
+        setColor(color);
+      });
     }
   }, [color, setColor]);
   React.useEffect(() => {
     if (window.cursors) {
       window.cursors.name = name;
+      window.cursors.on("name", (name) => {
+        setName(name);
+      });
     }
   }, [name, setName]);
 

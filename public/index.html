@@ -20,6 +20,83 @@
     <link rel="stylesheet" href="/normalize.css" />
     <link rel="stylesheet" href="/styles.css" />
     <script src="/meta.js"></script>
+    <style>
+      /* Cursor Controls Styling */
+      #cursor-controls {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .control-group {
+        margin-bottom: 15px;
+      }
+
+      .control-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+      }
+
+      .control-group input[type="text"] {
+        width: 100%;
+        max-width: 300px;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .color-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .color-controls input[type="color"] {
+        width: 50px;
+        height: 40px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      #random-color-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s;
+      }
+
+      #random-color-btn:hover {
+        background: #0056b3;
+      }
+
+      .current-cursor-info {
+        margin-top: 15px;
+        padding: 10px;
+        background: #e9ecef;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      #current-color-display {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 3px;
+        border: 1px solid #ccc;
+        vertical-align: middle;
+        margin-left: 5px;
+      }
+    </style>
   </head>
   <body>
     <main>
@@ -95,6 +172,33 @@
         </p>
 
         <hr />
+        <h2>Customize Your Cursor</h2>
+        <div id="cursor-controls">
+          <div class="control-group">
+            <label for="cursor-name">Your Name:</label>
+            <input
+              type="text"
+              id="cursor-name"
+              placeholder="Enter your name"
+              maxlength="10"
+            />
+          </div>
+          <div class="control-group">
+            <label for="cursor-color">Your Color:</label>
+            <div class="color-controls">
+              <input type="color" id="cursor-color" />
+              <button id="random-color-btn">Random Color</button>
+            </div>
+          </div>
+          <div class="current-cursor-info">
+            <p>
+              Current: <span id="current-name">Anonymous</span> with color
+              <span id="current-color-display"></span>
+            </p>
+          </div>
+        </div>
+
+        <hr />
         <h2>Current Users</h2>
         <div id="current-users">
           <p>Number of users: <span id="user-count">0</span></p>
@@ -114,6 +218,116 @@
       window.addEventListener("load", () => {
         const userCount = document.getElementById("user-count");
         const colorSwatches = document.getElementById("color-swatches");
+
+        // Cursor control elements
+        const cursorNameInput = document.getElementById("cursor-name");
+        const cursorColorInput = document.getElementById("cursor-color");
+        const randomColorBtn = document.getElementById("random-color-btn");
+        const currentNameDisplay = document.getElementById("current-name");
+        const currentColorDisplay = document.getElementById(
+          "current-color-display"
+        );
+
+        // Helper function to determine text color based on background
+        function getContrastColor(hexcolor) {
+          // Remove the hash if it exists
+          hexcolor = hexcolor.replace("#", "");
+
+          // Convert to RGB
+          const r = parseInt(hexcolor.substr(0, 2), 16);
+          const g = parseInt(hexcolor.substr(2, 2), 16);
+          const b = parseInt(hexcolor.substr(4, 2), 16);
+
+          // Calculate luminance
+          const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+          // Return black or white based on luminance
+          return luminance > 0.5 ? "#000000" : "#ffffff";
+        }
+
+        // Generate random color using a simple algorithm (since we can't access the randomcolor library directly)
+        function generateRandomColor() {
+          const hue = Math.floor(Math.random() * 360);
+          const saturation = Math.floor(Math.random() * 30) + 70; // 70-100%
+          const lightness = Math.floor(Math.random() * 20) + 40; // 40-60%
+          return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        // Convert HSL to hex for color input
+        function hslToHex(h, s, l) {
+          h /= 360;
+          s /= 100;
+          l /= 100;
+
+          const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+          };
+
+          const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+          const p = 2 * l - q;
+          const r = hue2rgb(p, q, h + 1 / 3);
+          const g = hue2rgb(p, q, h);
+          const b = hue2rgb(p, q, h - 1 / 3);
+
+          const toHex = (c) => {
+            const hex = Math.round(c * 255).toString(16);
+            return hex.length === 1 ? "0" + hex : hex;
+          };
+
+          return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        }
+
+        // Update current info display
+        function updateCurrentInfo() {
+          const currentName = window.cursors.name || "Anonymous";
+          const currentColor = window.cursors.color;
+
+          currentNameDisplay.textContent = currentName;
+          currentColorDisplay.style.backgroundColor = currentColor;
+
+          // Update input values to match current state
+          cursorNameInput.value = currentName;
+
+          // Convert color to hex if it's in HSL format
+          if (currentColor.startsWith("hsl")) {
+            const hslMatch = currentColor.match(
+              /hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/
+            );
+            if (hslMatch) {
+              const [, h, s, l] = hslMatch;
+              cursorColorInput.value = hslToHex(
+                parseInt(h),
+                parseInt(s),
+                parseInt(l)
+              );
+            }
+          } else {
+            cursorColorInput.value = currentColor;
+          }
+        }
+
+        // Listen for cursor updates
+        window.cursors.on("color", updateCurrentInfo);
+        window.cursors.on("name", updateCurrentInfo);
+
+        // Set up event listeners for controls
+        cursorNameInput.addEventListener("input", (e) => {
+          window.cursors.name = e.target.value;
+        });
+
+        cursorColorInput.addEventListener("input", (e) => {
+          window.cursors.color = e.target.value;
+        });
+
+        randomColorBtn.addEventListener("click", () => {
+          const randomColor = generateRandomColor();
+          window.cursors.color = randomColor;
+        });
 
         // Update colors display and count
         window.cursors.on("allColors", (colors) => {
@@ -137,22 +351,8 @@
           });
         });
 
-        // Helper function to determine text color based on background
-        function getContrastColor(hexcolor) {
-          // Remove the hash if it exists
-          hexcolor = hexcolor.replace("#", "");
-
-          // Convert to RGB
-          const r = parseInt(hexcolor.substr(0, 2), 16);
-          const g = parseInt(hexcolor.substr(2, 2), 16);
-          const b = parseInt(hexcolor.substr(4, 2), 16);
-
-          // Calculate luminance
-          const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-          // Return black or white based on luminance
-          return luminance > 0.5 ? "#000000" : "#ffffff";
-        }
+        // Initialize the display
+        setTimeout(updateCurrentInfo, 100); // Small delay to ensure cursors are initialized
       });
     </script>
   </body>
