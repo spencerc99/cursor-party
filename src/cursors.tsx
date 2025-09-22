@@ -132,7 +132,6 @@ if (!window.cursors) {
     set color(value: string) {
       const oldValue = _color;
       _color = value;
-      console.log("set color", value, oldValue);
       if (oldValue !== value) {
         const callbacks = listeners.get("color");
         if (callbacks) {
